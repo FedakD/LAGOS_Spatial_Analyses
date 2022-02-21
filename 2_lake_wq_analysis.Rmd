@@ -1,7 +1,7 @@
 ---
 title: "Lake Water Quality Analysis"
-author: "Matthew Ross"
-date: "9/17/2019"
+author: "Derek Fedak"
+date: "`r format(Sys.time(), '%A %d %B, %Y')`"
 output: html_document
 ---
 
@@ -120,19 +120,23 @@ mapview(mean_spatial,zcol='log10_mean_chl')
 
 # Class work
 
-## 1) What is the correlation between Secchi Disk Depth and Chlorophyll a for
-sites with at least 200 observations?
+## 1) What is the correlation between Secchi Disk Depth and Chlorophyll a for sites with at least 200 observations?
 
 - Here, I just want a plot of chla vs secchi for all sites 
 
 ```{r}
-#Your code here
-
+ggplot(chla_secchi_200, aes(x=secchi, y=chla)) +
+  xlab("Secchi Disk Depth") +
+  ylab("Chlorophyl a Concentration") +
+  geom_point()
 ```
 
 
 ## Why might this be the case? 
 
+### Answer
+
+We see a pretty strong negative correlation between secchi disk depth and cholorophyl a concentration. While some surface or close-to-surface secchi disk readings show low chlorophyll a concentrations, we will see cholorophyll a concentrations decrease with increasing water depth as light is less able to permeate to deeper depths. Since chlorophyll a is a photosynthetic compound present in aquatic algae and plants, concentration decreases with less light and nutrients.
 
 ## 2) What states have the most data? 
 
