@@ -3,6 +3,8 @@ title: "Lake Water Quality Analysis"
 author: "Derek Fedak"
 date: "`r format(Sys.time(), '%A %d %B, %Y')`"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 
@@ -88,8 +90,6 @@ chla_secchi_200 <- chla_secchi %>%
 spatial_200 <- inner_join(spatial_lakes,chla_secchi_200 %>%
                             distinct(lagoslakeid,.keep_all=T),
                           by='lagoslakeid')
-
-
 ```
 
 ### Mean Chl_a map
@@ -140,12 +140,18 @@ We see a pretty strong negative correlation between secchi disk depth and cholor
 
 ## 2) What states have the most data? 
 
-### 2a) First you will need to make a lagos spatial dataset that has the total 
-number of counts per site.
+### 2a) First you will need to make a lagos spatial dataset that has the total number of counts per site.
 
 ```{r}
-
-## Your code here
+site_count <- chla_secchi %>%
+  group_by(lagoslakeid) %>%
+  mutate(count = n()) %>%
+  distinct(lagoslakeid, .keep_all=T)
+  
+  
+spatial_site_count <- inner_join(spatial_lakes,site_count %>%
+                                   distinct(lagoslakeid,.keep_all=T),
+                                 by='lagoslakeid')
 ```
 
 
@@ -153,22 +159,58 @@ number of counts per site.
 data. 
 
 ```{r}
-## Your code here
+state_sites <- st_join(spatial_site_count, us_states())
 ```
 
 
-### 2c) Then you will want to group by state and sum all the observations in that
-state and arrange that data from most to least toatl observations per state. 
+### 2c) Then you will want to group by state and sum all the observations in that state and arrange that data from most to least total observations per state. 
 
 ```{r}
-## Your code here. 
+state_site_count <- state_sites %>%
+  group_by(name) %>%
+  mutate(observations = sum(count)) %>%
+  distinct(name, .keep_all=T)
+
+#state_site_count[order(state_site_count$observations),]
+
+ggplot(state_site_count, aes(x=state_abbr, y=observations)) +
+  geom_point() +
+  xlab("State") +
+  ylab("# of Secchi Disk Observations")
 ```
 
-##3 Is there a spatial pattern in Secchi disk depth for lakes with at least 200 
-observations?
+### Answer 2)
+
+Minnesota has the most observations, and it isn't close. Maine, Missouri, New York, Rhode Island, Vermont, and Wisconsin are a distant second group. Due to their area, Rhode Island and Vermont have a higher density of observations per area.
+
+##3 Is there a spatial pattern in Secchi disk depth for lakes with at least 200 observations?
 
 ```{r}
-## Your code here
+site_count_200 <- chla_secchi %>%
+  group_by(lagoslakeid) %>%
+  mutate(count = n()) %>%
+  distinct(lagoslakeid, .keep_all=T)
+  
+  
+spatial_site_count_200 <- inner_join(spatial_lakes,site_count_200 %>%
+                                   distinct(lagoslakeid,.keep_all=T),
+                                 by='lagoslakeid')
+
+state_sites_200 <- st_join(spatial_site_count_200, us_states())
+
+state_site_count_200 <- state_sites_200 %>%
+  group_by(name) %>%
+  mutate(observations = sum(count)) %>%
+  distinct(name, .keep_all=T)
+
+#state_site_count[order(state_site_count$observations),]
+
+ggplot(state_site_count_200, aes(x=state_abbr, y=observations)) +
+  geom_point() +
+  xlab("State") +
+  ylab("# of Secchi Disk Observations")
+
+mapview(state_site_count_200)
 
 ```
 

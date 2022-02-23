@@ -28,7 +28,7 @@ library(USAboundaries) #USA states and counties
 
 ```{r data-read}
 # #Lagos download script
-LAGOSNE::lagosne_get(dest_folder = LAGOSNE:::lagos_path())
+#LAGOSNE::lagosne_get(dest_folder = LAGOSNE:::lagos_path())
 
 
 #Load in lagos
@@ -159,7 +159,7 @@ ggplot(data=ia_mn_lakes, aes(log(lake_area_ha))) +
 ia_il_lakes %>%
   arrange(-lake_area_ha) %>%
     slice(1:5000) %>%
-  mapview(.,zcol = 'lake_area_ha')
+  mapview(.,zcol = 'lake_area_ha', canvas=T)
 ```
 
 
