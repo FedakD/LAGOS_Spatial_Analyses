@@ -126,8 +126,9 @@ mapview(mean_spatial,zcol='log10_mean_chl')
 
 ```{r}
 ggplot(chla_secchi_200, aes(x=secchi, y=chla)) +
-  xlab("Secchi Disk Depth") +
+  xlab("Secchi Disk Depth (m)") +
   ylab("Chlorophyl a Concentration") +
+  ggtitle("Chlorophyl a Concentration at Given Secchi Disk Depth") +
   geom_point()
 ```
 
@@ -176,42 +177,42 @@ state_site_count <- state_sites %>%
 ggplot(state_site_count, aes(x=state_abbr, y=observations)) +
   geom_point() +
   xlab("State") +
-  ylab("# of Secchi Disk Observations")
+  ylab("# of Secchi Disk Observations") +
+  ggtitle("Total Number of Secchi Disk Readings by State")
 ```
 
 ### Answer 2)
 
 Minnesota has the most observations, and it isn't close. Maine, Missouri, New York, Rhode Island, Vermont, and Wisconsin are a distant second group. Due to their area, Rhode Island and Vermont have a higher density of observations per area.
 
-##3 Is there a spatial pattern in Secchi disk depth for lakes with at least 200 observations?
+
+## 3 Is there a spatial pattern in Secchi disk depth for lakes with at least 200 observations?
 
 ```{r}
-site_count_200 <- chla_secchi %>%
+#Combine lakes with >200 observations to spatial data
+secchi_200_lagos <- inner_join(spatial_lakes,chla_secchi_200, by='lagoslakeid')
+
+#Combine that output to states spatial data, retain count and keep only max secchi depth
+secchi_200_max_states <- st_join(secchi_200_lagos, us_states()) %>%
   group_by(lagoslakeid) %>%
-  mutate(count = n()) %>%
-  distinct(lagoslakeid, .keep_all=T)
-  
-  
-spatial_site_count_200 <- inner_join(spatial_lakes,site_count_200 %>%
-                                   distinct(lagoslakeid,.keep_all=T),
-                                 by='lagoslakeid')
+  slice_max(secchi)
 
-state_sites_200 <- st_join(spatial_site_count_200, us_states())
-
-state_site_count_200 <- state_sites_200 %>%
-  group_by(name) %>%
-  mutate(observations = sum(count)) %>%
-  distinct(name, .keep_all=T)
-
-#state_site_count[order(state_site_count$observations),]
-
-ggplot(state_site_count_200, aes(x=state_abbr, y=observations)) +
+ggplot(secchi_200_max_states, aes(x=state_abbr, y=secchi)) +
   geom_point() +
   xlab("State") +
-  ylab("# of Secchi Disk Observations")
+  ylab("Secchi Disk Depth (m)") +
+  ggtitle("State Max Secchi Depth Readings per Lake")
 
-mapview(state_site_count_200)
+ggplot(secchi_200_max_states, aes(x=count, y=secchi)) +
+  geom_point() +
+  xlab("# of Secchi Measurements") +
+  ylab("Secchi Disk Depth (m)") +
+  ggtitle("Relationship Between Max Secchi Disk Depth and Number of Observations")
+
+mapview(secchi_200_max_states, zcol = 'secchi', canvas=T)
 
 ```
 
+### Answer 3)
 
+There does not appear to be a discernible pattern in max Secchi disk depth once >200 measurements are taken. Our greatest depth values (two readings >20m) occurred in lakes in Missouri and Rhode Island with 203 and 209 observations, respectively. All other max Secchi disk depths for lakes in these states were <10m. New York and Wisconsin had the greatest spread of disk depth measurements without much consistency. Minnesota, Rhode Island, and Vermont had the greatest clustering of max Secchi disk depth, excluding Rhode Island's deepest lake reading at 22m. An inspection of our map shows that lakes are largely clustered around St. Paul-Minneapolis in MN as well as within RI due to its smaller area. The remaining states have a greater spatial distribution of readings across the state.
